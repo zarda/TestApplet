@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="WindowsFormsApp1_BackgroundWorker.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Test" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Test</Value>
+    </Setting>
+    <Setting Name="Start" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Start</Value>
+    </Setting>
+    <Setting Name="Pause" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Pause</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

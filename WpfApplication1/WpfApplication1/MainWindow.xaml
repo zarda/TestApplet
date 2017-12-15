@@ -1,0 +1,31 @@
+﻿<Window x:Class="WpfApplication1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApplication1"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="320" Width="500" Visibility="Visible" WindowStyle="ToolWindow">
+    <Grid >
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                <GradientStop Color="#FF1E2321" Offset="1"/>
+                <GradientStop Color="#FF60109F"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Button x:Name="Button0" Content="Button0" HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="115" MouseEnter="button0_MouseEnter" MouseLeave="button0_MouseLeave" Margin="0,  0,0,0" FontSize="16" Click="button0_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="Button1" Content="Button1" HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="115" MouseEnter="button1_MouseEnter" MouseLeave="button1_MouseLeave" Margin="0, 50,0,0" FontSize="16" Click="button1_Click"/>
+        <Button x:Name="Button2" Content="Button2" HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="115" MouseEnter="button2_MouseEnter" MouseLeave="button2_MouseLeave" Margin="0,100,0,0" FontSize="16" Click="button2_Click"/>
+        <Button x:Name="Button3" Content="Button3" HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="115" MouseEnter="button3_MouseEnter" MouseLeave="button3_MouseLeave" Margin="0,150,0,0" FontSize="16" Click="button3_Click"/>
+        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="170" Margin="140,30,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="330" UndoLimit="10" FontSize="16" MaxLines="10" IsUndoEnabled="True" BorderThickness="1" UseLayoutRounding="False" ScrollViewer.CanContentScroll="True" Background="White" Grid.ColumnSpan="2"/>
+        <Label x:Name="label" Content="Status Log" HorizontalAlignment="Left" Height="30" Margin="140,0,0,0" VerticalAlignment="Top" Width="330" Background="White" BorderThickness="1" FontSize="16" Grid.ColumnSpan="2"/>
+        <ProgressBar x:Name="Status0" HorizontalAlignment="Left" Height="20" Margin="0, 30,0,0" VerticalAlignment="Top" Width="115" Foreground="#FFEE44EE" MouseEnter="Status0_MouseEnter"/>
+        <ProgressBar x:Name="Status1" HorizontalAlignment="Left" Height="20" Margin="0, 80,0,0" VerticalAlignment="Top" Width="115" Foreground="#FF4444EE" MouseEnter="Status1_MouseEnter"/>
+        <ProgressBar x:Name="Status2" HorizontalAlignment="Left" Height="20" Margin="0,130,0,0" VerticalAlignment="Top" Width="115" Foreground="#FF44EE44" MouseEnter="Status2_MouseEnter"/>
+        <ProgressBar x:Name="Status3" HorizontalAlignment="Left" Height="20" Margin="0,180,0,0" VerticalAlignment="Top" Width="115" Foreground="#FFEE4444" MouseEnter="Status3_MouseEnter"/>
+        <TextBlock x:Name="Status0_textBlock" Text="{Binding ElementName=Status0, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Left" Height="20" Margin="40, 30,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="40" FontSize="14" FontWeight="Bold" TextAlignment="Center"/>
+        <TextBlock x:Name="Status1_textBlock" Text="{Binding ElementName=Status1, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Left" Height="20" Margin="40, 80,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="40" FontSize="14" FontWeight="Bold" TextAlignment="Center"/>
+        <TextBlock x:Name="Status2_textBlock" Text="{Binding ElementName=Status2, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Left" Height="20" Margin="40,130,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="40" FontSize="14" FontWeight="Bold" TextAlignment="Center"/>
+        <TextBlock x:Name="Status3_textBlock" Text="{Binding ElementName=Status3, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Left" Height="20" Margin="40,180,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="40" FontSize="14" FontWeight="Bold" TextAlignment="Center"/>
+    </Grid>
+</Window>
