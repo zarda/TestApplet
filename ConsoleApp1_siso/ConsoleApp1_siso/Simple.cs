@@ -53,14 +53,16 @@ namespace ConsoleApp1_siso
 
         private List<Fg_Struct> FG = null;
         private int boardNumber = 0;
-        private List<int> boardId;
-        private List<int> boardType;
+        private List<int> boardId = new List<int>();
+        private List<int> boardType = new List<int>();
         private uint camPort = (uint)(SiSoCsRt.PORT_A);
         private void InitializeFG()
         {
             try
             {
                 boardNumber = getNrOfBoards();
+                boardId.Clear();
+                boardType.Clear();
                 for (int i = 0; i < boardNumber; i++)
                 {
                     boardId.Add(i);
@@ -83,11 +85,14 @@ namespace ConsoleApp1_siso
         private void Simple_FormClosed(object sender, FormClosedEventArgs e)
         {
             // Clean up
-            if (fg != null)
+            foreach (var fg in FG)
             {
-                //SiSoCsRt.Fg_stopAcquire(fg, camPort);
-                //SiSoCsRt.Fg_FreeMemEx(fg, memHandle);
-                SiSoCsRt.Fg_FreeGrabber(fg);
+                if (fg != null)
+                {
+                    //SiSoCsRt.Fg_stopAcquire(fg, camPort);
+                    //SiSoCsRt.Fg_FreeMemEx(fg, memHandle);
+                    SiSoCsRt.Fg_FreeGrabber(fg);
+                } 
             }
         }
         public static int getNrOfBoards()

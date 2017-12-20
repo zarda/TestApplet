@@ -45,6 +45,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xaml" />
@@ -60,18 +63,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AcqAPC.cs" />
+    <Compile Include="Gbe_Simple.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Gbe_Simple.Designer.cs">
+      <DependentUpon>Gbe_Simple.cs</DependentUpon>
+    </Compile>
     <Compile Include="MyFirstSDK.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Simple.cs">
+    <Compile Include="FG_Simple.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Simple.Designer.cs">
-      <DependentUpon>Simple.cs</DependentUpon>
+    <Compile Include="FG_Simple.Designer.cs">
+      <DependentUpon>FG_Simple.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="SiSoCsInterface.dll" />
@@ -80,8 +90,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Simple.resx">
-      <DependentUpon>Simple.cs</DependentUpon>
+    <EmbeddedResource Include="FG_Simple.resx">
+      <DependentUpon>FG_Simple.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gbe_Simple.resx">
+      <DependentUpon>Gbe_Simple.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

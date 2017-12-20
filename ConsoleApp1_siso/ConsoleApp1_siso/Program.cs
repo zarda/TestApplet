@@ -17,7 +17,7 @@ namespace ConsoleApp1_siso
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Simple());
+            Application.Run(new Gbe_Simple());
         }
     }
 }
