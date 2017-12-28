@@ -74,25 +74,25 @@ namespace WpfApplication1
             textBox.Text += ((Button)e.Source).Name + " is Running\n";
             ((Button)e.Source).IsEnabled = false;
             p.Value = 0;
-            for (int i = 0; i < 100; i++)
-            {
-                p.Value = i;
-                await Task.Delay(50);
-            }
-            //await Dispatcher.BeginInvoke(new Action(async () =>
-            // {
-            //     while (p.Value < 100)
-            //     {
-            //         await Task.Delay(50);
-            //         p.Value++;
-            //         if (p.Value == 100)
-            //         {
-            //             ((Button)e.Source).IsEnabled = true;
-            //             textBox.Text += ((Button)e.Source).Name + " is Stop\n";
-            //             textBox.ScrollToEnd();
-            //         }
-            //     }
-            // }));
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    p.Value = i;
+            //    await Task.Delay(50);
+            //}
+            await Dispatcher.BeginInvoke(new Action(async () =>
+             {
+                 while (p.Value < 100)
+                 {
+                     await Task.Delay(50);
+                     p.Value++;
+                     if (p.Value == 100)
+                     {
+                         ((Button)e.Source).IsEnabled = true;
+                         textBox.Text += ((Button)e.Source).Name + " is Stop\n";
+                         textBox.ScrollToEnd();
+                     }
+                 }
+             }));
 
         }
 
