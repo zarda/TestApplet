@@ -22,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -67,6 +68,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AcqAPC.cs" />
+    <Compile Include="Cl_Simpley.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Cl_Simpley.Designer.cs">
+      <DependentUpon>Cl_Simpley.cs</DependentUpon>
+    </Compile>
     <Compile Include="Gbe_Simple.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -96,6 +103,9 @@
   <ItemGroup>
     <EmbeddedResource Include="FG_Simple.resx">
       <DependentUpon>FG_Simple.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Cl_Simpley.resx">
+      <DependentUpon>Cl_Simpley.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Gbe_Simple.resx">
       <DependentUpon>Gbe_Simple.cs</DependentUpon>

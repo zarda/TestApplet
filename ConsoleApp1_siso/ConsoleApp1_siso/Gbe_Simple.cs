@@ -33,7 +33,7 @@ namespace ConsoleApp1_siso
 
         private void DeviceStart()
         {
-            fg = SiSoCsRt.Fg_Init("QuadAreaBayer24", 0);
+            fg = SiSoCsRt.Fg_Init("QuadAreaGray8", 0);
             if (fg == null)
             {
                 throw new Exception( "Fg_Init : " + SiSoCsRt.Fg_getLastErrorDescription(null)); 
@@ -245,12 +245,12 @@ namespace ConsoleApp1_siso
 
         private void TestGrab()
         {
-            int nrOfPicturesToGrab = 60;
+            int nrOfPicturesToGrab = 100;
             int nbBuffers = 5;
             uint width  = (uint)GetWidth();
             uint height = (uint)GetHeight();
             int samplePerPixel = 1;
-            uint bytePerSample = 3;
+            uint bytePerSample = 1;
 
             uint imageSize = (uint)(bytePerSample * samplePerPixel * width * height);
 
@@ -285,14 +285,16 @@ namespace ConsoleApp1_siso
                 //SiSoCsRt.DrawBuffer(dispId0, SiSoCsRt.Fg_getImagePtrEx(fg, last_pic_nr, (uint)camPort, memHandle), last_pic_nr, "");
 
                 SisoImage img = SiSoCsRt.Fg_getImagePtrEx(fg, cur_pic_nr, camPort, memHandle);
-                using (var hImage = new HalconDotNet.HImage())
+                using (var hImage = new HalconDotNet.HImage("byte", (int)width, (int)height, img.asPtr()))
                 {
-                    hImage.GenImageInterleaved(img.asPtr(), "bgr", (int)width, (int)height, 0, "byte", 0, 0, 0, 0, -1, 0);
+                    var hImageRgb = hImage.CfaToRgb("bayer_rg", "bilinear");
+                    //hImage.GenImageInterleaved(img.asPtr(), "bgr", (int)width, (int)height, 0, "byte", 0, 0, 0, 0, -1, 0);
 
                     hWindowControl_color.SetFullImagePart(hImage);
-                    hImage.DispColor(hWindowControl_color.HalconWindow);
+                    hImageRgb.DispColor(hWindowControl_color.HalconWindow);
+                    //hImage.DispImage(hWindowControl_color.HalconWindow);
 
-                    using (var hImageTemp1 = hImage.Decompose3(out var hImageTemp2, out var hImageTemp3))
+                    using (var hImageTemp1 = hImageRgb.Decompose3(out var hImageTemp2, out var hImageTemp3))
                     {
                         hWindowControl_R.SetFullImagePart(hImageTemp1);
                         hWindowControl_G.SetFullImagePart(hImageTemp2);
