@@ -19,9 +19,10 @@ namespace ConsoleApp1_siso
         {
             InitializeComponent();
 
-            button_Connect.Enabled = true;
-            button_Disconnect.Enabled = false;
-            button_DoWork.Enabled = false;
+            button_Connect.Visible = true;
+            button_Disconnect.Visible = false;
+            button_DoWork.Visible = false;
+            
         }
 
         private Fg_Struct fg = null;
@@ -55,35 +56,33 @@ namespace ConsoleApp1_siso
 
         private void OnGrabDoneProcess(object sender, HalconDotNet.HImage e)
         {
-            using (var hImage = e)
-            {
-                using (var hImageRgb = hImage.CfaToRgb("bayer_rg", "bilinear"))
+            using (e)
+            {   
+                using (var hImageRgb = e.CfaToRgb("bayer_rg", "bilinear"))
                 {
-                    
-                        hWindowControl_color.SetFullImagePart(hImage);
-
+                    hWindowControl_color.SetFullImagePart(hImageRgb);
                     //hImage.GenImageInterleaved(img.asPtr(), "bgr", (int)width, (int)height, 0, "byte", 0, 0, 0, 0, -1, 0);
 
                     hImageRgb.DispColor(hWindowControl_color.HalconWindow);
                     //hImage.DispImage(hWindowControl_color.HalconWindow);
 
-                    using (var hImageTemp1 = hImageRgb.Decompose3(out var hImageTemp2, out var hImageTemp3))
+                    var hImageTemp1 = hImageRgb.Decompose3(out var hImageTemp2, out var hImageTemp3);
+                    hWindowControl_R.SetFullImagePart(hImageTemp1);
+                    hWindowControl_G.SetFullImagePart(hImageTemp2);
+                    hWindowControl_B.SetFullImagePart(hImageTemp3);
+
+                    using (hImageTemp1)
                     {
-
-                            hWindowControl_R.SetFullImagePart(hImageTemp1);
-                            hWindowControl_G.SetFullImagePart(hImageTemp2);
-                            hWindowControl_B.SetFullImagePart(hImageTemp3);
-
                         hImageTemp1.DispImage(hWindowControl_R.HalconWindow);
-                        using (hImageTemp2)
-                        {
-                            hImageTemp2.DispImage(hWindowControl_G.HalconWindow);
-                        }
-                        using (hImageTemp3)
-                        {
-                            hImageTemp3.DispImage(hWindowControl_B.HalconWindow);
-                        }
                     }
+                    using (hImageTemp2)
+                    {
+                        hImageTemp2.DispImage(hWindowControl_G.HalconWindow);
+                    }
+                    using (hImageTemp3)
+                    {
+                        hImageTemp3.DispImage(hWindowControl_B.HalconWindow);
+                        }
                 }
             }
         }
@@ -116,153 +115,397 @@ namespace ConsoleApp1_siso
             SisoClErrorThrow(error, "clGetNumSerialPorts");
             richTextBox.Text += $"Number of serial port     = {numSerialPort} \n";
 
-            for (int i = 0; i < 64; i++)
+            UInt64 eventScanMask = 0x01;
+            while (eventScanMask > 0)
             {
-                var eventName = SiSoCsRt.Fg_getEventName(fg, 1UL << i);
+                var eventName = SiSoCsRt.Fg_getEventName(fg, eventScanMask);
                 if (eventName!=null)
                 {
                     richTextBox.Text += $"Event name     =  {eventName} \n";   
                 }
+                /// query for the next event
+                eventScanMask <<= 1;
             }
-            var eventMask = SiSoCsRt.Fg_getEventMask(fg, "CamPortATransferEnd");
-            richTextBox.Text += $"Event Mask     = {eventMask} \n";
+            //var eventMask = SiSoCsRt.Fg_getEventMask(fg, "CamPortATransferEnd");
+            //
+
+            //foreach (var id in Enum.GetValues(typeof(Fg_parameterID)))
+            //{
+            //    richTextBox.Text += $"{(Fg_parameterID)id} = {GetParameterValue((int)id)} ( {GetParameterMin((int)id)} - {GetParameterMax((int)id)} ) \n";
+            //}
+
+            richTextBox.Text += $"Gain     = {GetGain()} ({GetGainRange().minimum}-{GetGainRange().maximum} / {GetGainRange().step}) \n";
+            richTextBox.Text += $"Width     = {GetWidth()} ({GetWidthRange().minimum}-{GetWidthRange().maximum} / {GetWidthRange().increase}) \n";
+            richTextBox.Text += $"Height     = {GetHeight()} ({GetHeightRange().minimum}-{GetHeightRange().maximum} / {GetHeightRange().increase}) \n";
+            richTextBox.Text += $"OffsetX     = {GetOffsetX()} ({GetOffsetXRange().minimum}-{GetOffsetXRange().maximum} / {GetOffsetXRange().increase}) \n";
+            richTextBox.Text += $"OffsetY     = {GetOffsetY()} ({GetOffsetYRange().minimum}-{GetOffsetYRange().maximum} / {GetOffsetYRange().increase}) \n";
 
         }
         #region parameter
-        private (double maximum, double minimum) GetGainRange()
+        public static int GetBoardNum()
         {
-            double Min = 0, Max = 0;
-            error = SiSoCsRt.Gbe_getFloatValueLimits(cameraHandle, "Gain", ref Min, ref Max);
-            SisoClErrorThrow(error, "Gbe_getFloatValueLimits(Gain)");
-            return (Max, Min);
+            int nrOfBoards = 0;
+            byte[] buffer = new byte[256];
+            uint buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getSystemInformation(
+                    null,
+                    Fg_Info_Selector.INFO_NR_OF_BOARDS,
+                    FgProperty.PROP_ID_VALUE,
+                    0,
+                    buffer,
+                    ref buflen))
+            {
+                nrOfBoards = int.Parse(Encoding.ASCII.GetString(buffer));
+            }
+            return nrOfBoards;
         }
+        
+        public string GetParameterName(int parameterID)
+        {
+            string value = string.Empty;
+            byte[] buffer = new byte[512];
+            int buflen = 512;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    parameterID,
+                    FgProperty.PROP_ID_NAME,
+                    buffer,
+                    ref buflen))
+            {
+                value = Encoding.Default.GetString(buffer);
+            }
+            return value;
+        }
+        public long GetWidthMax()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_WIDTH,
+                    FgProperty.PROP_ID_MAX,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        public long GetWidthMin()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_WIDTH,
+                    FgProperty.PROP_ID_MIN,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        public long GetWidthIncrease()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_WIDTH,
+                    FgProperty.PROP_ID_STEP,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        public long GetHeightMax()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_HEIGHT,
+                    FgProperty.PROP_ID_MAX,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        public long GetHeighthMin()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_HEIGHT,
+                    FgProperty.PROP_ID_MIN,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        public long GetHeightIncrease()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_HEIGHT,
+                    FgProperty.PROP_ID_STEP,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        public long GetOffsetXMax()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_XOFFSET,
+                    FgProperty.PROP_ID_MAX,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        public long GetOffsetXMin()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_XOFFSET,
+                    FgProperty.PROP_ID_MIN,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        public long GetOffsetXIncrease()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_XOFFSET,
+                    FgProperty.PROP_ID_STEP,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        public long GetOffsetYMax()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_YOFFSET,
+                    FgProperty.PROP_ID_MAX,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        public long GetOffsetYMin()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_YOFFSET,
+                    FgProperty.PROP_ID_MIN,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        public long GetOffsetYIncrease()
+        {
+            long value = 0;
+            byte[] buffer = new byte[256];
+            int buflen = 256;
+            buffer[0] = 0;
+
+            if (SiSoCsRt.FG_OK == SiSoCsRt.Fg_getParameterProperty(
+                    fg,
+                    (int)Fg_parameterID.FG_YOFFSET,
+                    FgProperty.PROP_ID_STEP,
+                    buffer,
+                    ref buflen))
+            {
+                value = long.Parse(Encoding.Default.GetString(buffer));
+            }
+            return value;
+        }
+        private (double maximum, double minimum, double step) GetGainRange()
+        {            
+            return (255, 0, 0.001);
+        }
+
         private double GetGain()
         {
-            double value = 0;
-            error = SiSoCsRt.Gbe_getFloatValue(cameraHandle, "Gain", ref value);
-            SisoClErrorThrow(error, "Gbe_getFloatValue(Gain)");
+            error = SiSoCsRt.Fg_getParameterWithDouble(fg, SiSoCsRt.FG_PROCESSING_GAIN, out double value, camPort);
+            SisoClErrorThrow(error, "Fg_getParameterWithDouble(FG_PROCESSING_GAIN)");
             return value;
         }
-        private double SetGain(double value)
+        
+        private void SetGain(double value)
         {
-            value = GetGainRange().minimum < value ? value < GetGainRange().maximum ? value : GetGainRange().maximum :GetGainRange().minimum;
-            error = SiSoCsRt.Gbe_setFloatValue(cameraHandle, "Gain", value);
-            SisoClErrorThrow(error, "Gbe_getFloatValue(Gain)");
-            return value;
+            value = GetGainRange().minimum < value ? value < GetGainRange().maximum ? value : GetGainRange().maximum : GetGainRange().minimum;
+            error = SiSoCsRt.Fg_setParameterWithDouble(fg, SiSoCsRt.FG_PROCESSING_GAIN, value, camPort);
+            SisoClErrorThrow(error, "Fg_setParameterWithDouble(FG_PROCESSING_GAIN)");
         }
 
         private (double maximum, double minimum) GetExposureTimeRange()
         {
-            double Min = 0, Max = 0;
-            error = SiSoCsRt.Gbe_getFloatValueLimits(cameraHandle, "ExposureTime", ref Min, ref Max);
-            SisoClErrorThrow(error, "Gbe_getFloatValueLimits(ExposureTime)");
-            return (Max, Min);
+            return (10, 0);
         }
         private double GetExposureTime()
         {
-            double value = 0;
-            error = SiSoCsRt.Gbe_getFloatValue(cameraHandle, "ExposureTime", ref value);
-            SisoClErrorThrow(error, "Gbe_getFloatValue(ExposureTime)");
+            error = SiSoCsRt.Fg_getParameterWithDouble(fg, SiSoCsRt.FG_EXPOSURE, out double value, camPort);
+            SisoFgErrorThrow(error, "Fg_getParameterWithDouble(FG_EXPOSURE)");
             return value;
         }
-        private double SetExposureTime(double value)
+        private void SetExposureTime(double value)
         {
-            value = GetExposureTimeRange().minimum < value ? value < GetExposureTimeRange().maximum ? value : GetExposureTimeRange().maximum : GetExposureTimeRange().minimum;
-            error = SiSoCsRt.Gbe_setFloatValue(cameraHandle, "ExposureTime", value);
-            SisoClErrorThrow(error, "Gbe_getFloatValue(ExposureTime)");
-            return value;
+            //value = GetExposureTimeRange().minimum < value ? value < GetExposureTimeRange().maximum ? value : GetExposureTimeRange().maximum : GetExposureTimeRange().minimum;
+            error = SiSoCsRt.Fg_setParameterWithDouble(fg, SiSoCsRt.FG_EXPOSURE, value, camPort);
+            SisoFgErrorThrow(error, "Fg_setParameterWithDouble(FG_EXPOSURE)");
         }
 
         private (long maximum, long minimum, long increase) GetWidthRange()
-        {
-            long Min = 0, Max = 0, Inc = 0;
-            error = SiSoCsRt.Gbe_getIntegerValueLimits(cameraHandle, "Width", ref Min, ref Max, ref Inc);
-            SisoClErrorThrow(error, "Gbe_getIntegerValueLimits(Width)");
-            return (Max, Min, Inc);
+        {            
+            return (GetWidthMax(), GetWidthMin(), GetWidthIncrease());
         }
         private long GetWidth()
         {
             long value = 0;
-            error = SiSoCsRt.Gbe_getIntegerValue(cameraHandle, "Width", ref value);
-            SisoClErrorThrow(error, "Gbe_getIntegerValue(Width)");
+            error = SiSoCsRt.Fg_getParameterWithLong(fg, SiSoCsRt.FG_WIDTH, out value, camPort);
+            SisoFgErrorThrow(error, "Fg_getParameterWithLong(FG_WIDTH)");
             return value;
         }
-        private long SetWidth(long value)
+        private void SetWidth(long value)
         {
             value -= value % GetWidthRange().increase;
             value = GetWidthRange().minimum < value ? value < GetWidthRange().maximum ? value : GetWidthRange().maximum : GetWidthRange().minimum;
-            error = SiSoCsRt.Gbe_setIntegerValue(cameraHandle, "Width", value);
-            SisoClErrorThrow(error, "Gbe_getIntegerValue(Width)");
-            return value;
+            error = SiSoCsRt.Fg_setParameterWithLong(fg, SiSoCsRt.FG_WIDTH, value, camPort);
+            SisoFgErrorThrow(error, "Fg_setParameterWithLong(FG_WIDTH)");
         }
 
         private (long maximum, long minimum, long increase) GetHeightRange()
-        {
-            long Min = 0, Max = 0, Inc=0;
-            error = SiSoCsRt.Gbe_getIntegerValueLimits(cameraHandle, "Height", ref Min, ref Max, ref Inc);
-            SisoClErrorThrow(error, "Gbe_getFloatValueLimits(Height)");
-            return (Max, Min, Inc);
+        {  
+            return (GetHeightMax(), GetHeighthMin(), GetHeightIncrease());
         }
         private long GetHeight()
         {
             long value = 0;
-            error = SiSoCsRt.Gbe_getIntegerValue(cameraHandle, "Height", ref value);
-            SisoClErrorThrow(error, "Gbe_getIntegerValue(Height)");
+            error = SiSoCsRt.Fg_getParameterWithLong(fg, SiSoCsRt.FG_HEIGHT, out value, camPort);
+            SisoFgErrorThrow(error, "Fg_getParameterWithLong(FG_HEIGHT)");
             return value;
         }
-        private long SetHeight(long value)
+        private void SetHeight(long value)
         {
             value -= value % GetHeightRange().increase;
             value = GetHeightRange().minimum < value ? value < GetHeightRange().maximum ? value : GetHeightRange().maximum : GetHeightRange().minimum;
-            error = SiSoCsRt.Gbe_setIntegerValue(cameraHandle, "Height", value);
-            SisoClErrorThrow(error, "Gbe_getIntegerValue(Height)");
-            return value;
+            error = SiSoCsRt.Fg_setParameterWithLong(fg, SiSoCsRt.FG_HEIGHT, value, camPort);
+            SisoFgErrorThrow(error, "Fg_setParameterWithUInt(FG_HEIGHT)");
         }
 
         private (long maximum, long minimum, long increase) GetOffsetXRange()
         {
-            long Min = 0, Max = 0, Inc = 0;
-            error = SiSoCsRt.Gbe_getIntegerValueLimits(cameraHandle, "OffsetX", ref Min, ref Max, ref Inc);
-            SisoClErrorThrow(error, "Gbe_getFloatValueLimits(OffsetX)");
-            return (Max, Min, Inc);
+            return (GetOffsetXMax(), GetOffsetXMin(), GetOffsetXIncrease());
         }
         private long GetOffsetX()
         {
             long value = 0;
-            error = SiSoCsRt.Gbe_getIntegerValue(cameraHandle, "OffsetX", ref value);
-            SisoClErrorThrow(error, "Gbe_getIntegerValue(OffsetX)");
+            error = SiSoCsRt.Fg_getParameterWithLong(fg, SiSoCsRt.FG_XOFFSET, out value, camPort);
+            SisoFgErrorThrow(error, "Fg_getParameterWithLong(FG_XOFFSET)");
             return value;
         }
-        private long SetOffsetX(long value)
+        private void SetOffsetX(long value)
         {
             value -= value % GetOffsetXRange().increase;
             value = GetOffsetXRange().minimum < value ? value < GetOffsetXRange().maximum ? value : GetOffsetXRange().maximum : GetOffsetXRange().minimum;
             error = SiSoCsRt.Gbe_setIntegerValue(cameraHandle, "OffsetX", value);
             SisoClErrorThrow(error, "Gbe_getIntegerValue(OffsetX)");
-            return value;
         }
 
         private (long maximum, long minimum, long increase) GetOffsetYRange()
         {
-            long Min = 0, Max = 0, Inc = 0;
-            error = SiSoCsRt.Gbe_getIntegerValueLimits(cameraHandle, "OffsetY", ref Min, ref Max, ref Inc);
-            SisoClErrorThrow(error, "Gbe_getFloatValueLimits(OffsetY)");
-            return (Max, Min, Inc);
+            return (GetOffsetYMax(), GetOffsetYMin(), GetOffsetYIncrease());
         }
         private long GetOffsetY()
         {
             long value = 0;
-            error = SiSoCsRt.Gbe_getIntegerValue(cameraHandle, "OffsetY", ref value);
-            SisoClErrorThrow(error, "Gbe_getIntegerValue(OffsetY)");
+            error = SiSoCsRt.Fg_getParameterWithLong(fg, SiSoCsRt.FG_YOFFSET, out value, camPort);
+            SisoFgErrorThrow(error, "Fg_getParameterWithLong(FG_YOFFSET)");
             return value;
         }
-        private long SetOffsetY(long value)
+        private void SetOffsetY(long value)
         {
             value -= value % GetOffsetYRange().increase;
             value = GetOffsetYRange().minimum < value ? value < GetOffsetYRange().maximum ? value : GetOffsetYRange().maximum : GetOffsetYRange().minimum;
             error = SiSoCsRt.Gbe_setIntegerValue(cameraHandle, "OffsetY", value);
             SisoClErrorThrow(error, "Gbe_getIntegerValue(OffsetY)");
-            return value;
         }
         #endregion
         private void DoWork()
@@ -280,16 +523,14 @@ namespace ConsoleApp1_siso
             int samplePerPixel = 1;
             uint bytePerSample = 1;
 
-            uint imageSize = (uint)(bytePerSample * samplePerPixel * width * height);
+            //uint imageSize = (uint)(bytePerSample * samplePerPixel * width * height);
 
             // AllocateDMA
             uint totalBufferSize = (uint)(width * height * samplePerPixel * bytePerSample * nbBuffers);
             dma_mem memHandle = SiSoCsRt.Fg_AllocMemEx(fg, totalBufferSize, nbBuffers);
 
-            error = SiSoCsRt.Fg_setParameterWithUInt(fg, SiSoCsRt.FG_WIDTH, width, camPort);
-            SisoFgErrorThrow(error, "Fg_setParameterWithUInt(FG_WIDTH)");
-            error = SiSoCsRt.Fg_setParameterWithUInt(fg, SiSoCsRt.FG_HEIGHT, height, camPort);
-            SisoFgErrorThrow(error, "Fg_setParameterWithUInt(FG_HEIGHT)");
+            SetWidth(width);
+            SetHeight(height);
             SiSoCsRt.Fg_setParameterWithInt(fg, SiSoCsRt.FG_BITALIGNMENT, SiSoCsRt.FG_LEFT_ALIGNED, camPort);
             SisoFgErrorThrow(error, "Fg_setParameterWithInt(FG_BITALIGNMENT)");
 
@@ -346,6 +587,7 @@ namespace ConsoleApp1_siso
 
         private void DeviceOff()
         {
+            OnGrabDoneEvent -= new EventHandler<HalconDotNet.HImage>(OnGrabDoneProcess);
             if (board != null)
             {
                 //SiSoCsRt.clSerialClose(board);
@@ -361,19 +603,19 @@ namespace ConsoleApp1_siso
         {
             DeviceOff();
             richTextBox.Clear();
-            button_Connect.Enabled = true;
-            button_Disconnect.Enabled = false;
-            button_DoWork.Enabled = false;
+            button_Connect.Visible = true;
+            button_Disconnect.Visible = false;
+            button_DoWork.Visible = false;
 
         }
 
-        private void button_connect_Click(object sender, EventArgs e)
+        private void button_Connect_Click(object sender, EventArgs e)
         {
             DeviceStart();
             GetInformation();
-            button_Connect.Enabled = false;
-            button_Disconnect.Enabled = true;
-            button_DoWork.Enabled = true;
+            button_Connect.Visible = false;
+            button_Disconnect.Visible = true;
+            button_DoWork.Visible = true;
         }
 
         private async void button_DoWork_Click(object sender, EventArgs e)
@@ -382,24 +624,20 @@ namespace ConsoleApp1_siso
             {
                 case true:
                     isGrab = false;
-                    button_DoWork.Enabled = false;
+                    button_DoWork.Visible = false;
                     break;
                 case false:
                     isGrab = true;
-                    button_Disconnect.Enabled = false;
+                    button_Disconnect.Visible = false;
                     button_DoWork.Text = "Stop";
                     await Task.Run(() => DoWork());
                     button_DoWork.Text = "Run";
-                    button_Disconnect.Enabled = true;
-                    button_DoWork.Enabled = true;
+                    button_Disconnect.Visible = true;
+                    button_DoWork.Visible = true;
                     break;                
             }
         }
         
-        private void Cl_Simple_ResizeEnd(object sender, EventArgs e)
-        {
-            hWindowControl_color.Refresh();
-        }
 
         enum ClError
         {

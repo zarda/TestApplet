@@ -40,15 +40,15 @@
             // 
             // richTextBox
             // 
-            this.richTextBox.Location = new System.Drawing.Point(12, 147);
+            this.richTextBox.Location = new System.Drawing.Point(12, 54);
             this.richTextBox.Name = "richTextBox";
-            this.richTextBox.Size = new System.Drawing.Size(234, 321);
+            this.richTextBox.Size = new System.Drawing.Size(352, 420);
             this.richTextBox.TabIndex = 0;
             this.richTextBox.Text = "";
             // 
             // button_Disconnect
             // 
-            this.button_Disconnect.Location = new System.Drawing.Point(12, 105);
+            this.button_Disconnect.Location = new System.Drawing.Point(12, 12);
             this.button_Disconnect.Name = "button_Disconnect";
             this.button_Disconnect.Size = new System.Drawing.Size(95, 36);
             this.button_Disconnect.TabIndex = 2;
@@ -58,17 +58,17 @@
             // 
             // button_Connect
             // 
-            this.button_Connect.Location = new System.Drawing.Point(12, 69);
+            this.button_Connect.Location = new System.Drawing.Point(12, 12);
             this.button_Connect.Name = "button_Connect";
             this.button_Connect.Size = new System.Drawing.Size(95, 36);
             this.button_Connect.TabIndex = 2;
             this.button_Connect.Text = "Connect";
             this.button_Connect.UseVisualStyleBackColor = true;
-            this.button_Connect.Click += new System.EventHandler(this.button_connect_Click);
+            this.button_Connect.Click += new System.EventHandler(this.button_Connect_Click);
             // 
             // button_DoWork
             // 
-            this.button_DoWork.Location = new System.Drawing.Point(12, 33);
+            this.button_DoWork.Location = new System.Drawing.Point(113, 12);
             this.button_DoWork.Name = "button_DoWork";
             this.button_DoWork.Size = new System.Drawing.Size(95, 36);
             this.button_DoWork.TabIndex = 2;
@@ -81,7 +81,7 @@
             this.hWindowControl_color.BackColor = System.Drawing.Color.Black;
             this.hWindowControl_color.BorderColor = System.Drawing.Color.Black;
             this.hWindowControl_color.ImagePart = new System.Drawing.Rectangle(0, 0, 640, 480);
-            this.hWindowControl_color.Location = new System.Drawing.Point(252, 6);
+            this.hWindowControl_color.Location = new System.Drawing.Point(534, 12);
             this.hWindowControl_color.Name = "hWindowControl_color";
             this.hWindowControl_color.Size = new System.Drawing.Size(460, 460);
             this.hWindowControl_color.TabIndex = 3;
@@ -92,7 +92,7 @@
             this.hWindowControl_R.BackColor = System.Drawing.Color.Black;
             this.hWindowControl_R.BorderColor = System.Drawing.Color.Black;
             this.hWindowControl_R.ImagePart = new System.Drawing.Rectangle(0, 0, 640, 480);
-            this.hWindowControl_R.Location = new System.Drawing.Point(718, 6);
+            this.hWindowControl_R.Location = new System.Drawing.Point(378, 12);
             this.hWindowControl_R.Name = "hWindowControl_R";
             this.hWindowControl_R.Size = new System.Drawing.Size(150, 150);
             this.hWindowControl_R.TabIndex = 4;
@@ -103,7 +103,7 @@
             this.hWindowControl_G.BackColor = System.Drawing.Color.Black;
             this.hWindowControl_G.BorderColor = System.Drawing.Color.Black;
             this.hWindowControl_G.ImagePart = new System.Drawing.Rectangle(0, 0, 640, 480);
-            this.hWindowControl_G.Location = new System.Drawing.Point(718, 162);
+            this.hWindowControl_G.Location = new System.Drawing.Point(378, 168);
             this.hWindowControl_G.Name = "hWindowControl_G";
             this.hWindowControl_G.Size = new System.Drawing.Size(150, 150);
             this.hWindowControl_G.TabIndex = 4;
@@ -114,7 +114,7 @@
             this.hWindowControl_B.BackColor = System.Drawing.Color.Black;
             this.hWindowControl_B.BorderColor = System.Drawing.Color.Black;
             this.hWindowControl_B.ImagePart = new System.Drawing.Rectangle(0, 0, 640, 480);
-            this.hWindowControl_B.Location = new System.Drawing.Point(718, 318);
+            this.hWindowControl_B.Location = new System.Drawing.Point(378, 324);
             this.hWindowControl_B.Name = "hWindowControl_B";
             this.hWindowControl_B.Size = new System.Drawing.Size(150, 150);
             this.hWindowControl_B.TabIndex = 4;
@@ -124,7 +124,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(877, 478);
+            this.ClientSize = new System.Drawing.Size(1001, 486);
             this.Controls.Add(this.hWindowControl_B);
             this.Controls.Add(this.hWindowControl_G);
             this.Controls.Add(this.hWindowControl_R);
@@ -133,10 +133,8 @@
             this.Controls.Add(this.button_Connect);
             this.Controls.Add(this.button_Disconnect);
             this.Controls.Add(this.richTextBox);
-            this.MinimumSize = new System.Drawing.Size(893, 516);
             this.Name = "Cl_Simple";
             this.Text = "Cl_Simple";
-            this.ResizeEnd += new System.EventHandler(this.Cl_Simple_ResizeEnd);
             this.ResumeLayout(false);
 
         }

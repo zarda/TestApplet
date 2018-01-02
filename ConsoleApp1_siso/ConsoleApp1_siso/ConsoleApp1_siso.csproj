@@ -74,6 +74,7 @@
     <Compile Include="Cl_Simpley.Designer.cs">
       <DependentUpon>Cl_Simpley.cs</DependentUpon>
     </Compile>
+    <Compile Include="Fg_parameterID.cs" />
     <Compile Include="Gbe_Simple.cs">
       <SubType>Form</SubType>
     </Compile>
