@@ -25,7 +25,14 @@ namespace WpfApplication1
         public MainWindow()
         {
             InitializeComponent();
+            EventTrigger += OnTrigger;
         }
+
+        private void OnTrigger(object sender, ProgressBar e)
+        {
+            e.Value++;
+        }
+
         static int fontSizeChange = 6;
         private void button0_MouseEnter(object sender, MouseEventArgs e)
         {
@@ -68,31 +75,34 @@ namespace WpfApplication1
         {
             doWork(e, Status0);
         }
-
+        private event EventHandler<ProgressBar> EventTrigger;
         public async void doWork(RoutedEventArgs e, ProgressBar p)
         {
             textBox.Text += ((Button)e.Source).Name + " is Running\n";
             ((Button)e.Source).IsEnabled = false;
             p.Value = 0;
-            //for (int i = 0; i < 100; i++)
-            //{
-            //    p.Value = i;
-            //    await Task.Delay(50);
-            //}
-            await Dispatcher.BeginInvoke(new Action(async () =>
-             {
-                 while (p.Value < 100)
-                 {
-                     await Task.Delay(50);
-                     p.Value++;
-                     if (p.Value == 100)
-                     {
-                         ((Button)e.Source).IsEnabled = true;
-                         textBox.Text += ((Button)e.Source).Name + " is Stop\n";
-                         textBox.ScrollToEnd();
-                     }
-                 }
-             }));
+            for (int i = 0; i < 100; i++)
+            {                
+                await Task.Delay(50);
+                EventTrigger?.Invoke(this, p); // p.Value = i;
+            }
+            ((Button)e.Source).IsEnabled = true;
+            textBox.Text += ((Button)e.Source).Name + " is Stop\n";
+            textBox.ScrollToEnd();
+            //await Dispatcher.BeginInvoke(new Action(async () =>
+            // {
+            //     while (p.Value < 100)
+            //     {
+            //         await Task.Delay(50);
+            //         EventTrigger?.Invoke(this, p);
+            //         if (p.Value == 100)
+            //         {
+            //             ((Button)e.Source).IsEnabled = true;
+            //             textBox.Text += ((Button)e.Source).Name + " is Stop\n";
+            //             textBox.ScrollToEnd();
+            //         }
+            //     }
+            // }));
 
         }
 
