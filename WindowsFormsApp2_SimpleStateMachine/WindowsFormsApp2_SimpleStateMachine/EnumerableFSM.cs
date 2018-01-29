@@ -10,7 +10,9 @@ namespace WindowsFormsApp2_SimpleStateMachine
 {
     class EnumerableFSM
     {
-        public Action DoJob;
+        public Action DoActive;
+        public Action DoInActive;
+        public Action DoIdle;
         public List<Cmd> cmd = new List<Cmd>();
 
         private int Idx = 0;
@@ -19,6 +21,7 @@ namespace WindowsFormsApp2_SimpleStateMachine
         {
             InActive:
             yield return State.InActive;
+            DoInActive?.Invoke();
             switch (cmd[Idx++])
             {
                 case Cmd.Run:
@@ -29,16 +32,16 @@ namespace WindowsFormsApp2_SimpleStateMachine
 
             Active:
             yield return State.Active;
-            if (DoJob != null)
-            {
-                Task.Run(DoJob);
-            }
-            //DoJob?.Invoke();
+            //if (DoJob != null)
+            //{
+            //    Task.Run(DoJob);
+            //}
+            DoActive?.Invoke();
             switch (cmd[Idx++])
             {
                 case Cmd.End:
                     goto InActive;
-                case Cmd.Idle:
+                case Cmd.Pause:
                     goto Idle;
                 default:
                     goto Exit;
@@ -46,7 +49,7 @@ namespace WindowsFormsApp2_SimpleStateMachine
 
             Idle:
             yield return State.Idle;
-            Thread.Sleep(100);
+            DoIdle?.Invoke();
             switch (cmd[Idx++])
             {
                 case Cmd.End:
@@ -64,7 +67,7 @@ namespace WindowsFormsApp2_SimpleStateMachine
         {
             Run,
             End,
-            Idle,
+            Pause,
             Resume,
             Exit,
         }

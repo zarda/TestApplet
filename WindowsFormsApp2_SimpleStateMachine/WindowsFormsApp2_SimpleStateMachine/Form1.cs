@@ -22,28 +22,31 @@ namespace WindowsFormsApp2_SimpleStateMachine
         private void FSM1()
         {
             EnumerableFSM fsm = new EnumerableFSM();
-            fsm.DoJob += () => { Thread.Sleep(300); };
+            fsm.DoActive += () => { richTextBox1.AppendText("Active..." + "\n"); };
+            fsm.DoIdle += () => { richTextBox1.AppendText("Idle..." + "\n"); };
+            fsm.DoInActive += () => { richTextBox1.AppendText("Inactive..." + "\n"); };
 
             fsm.cmd = new List<EnumerableFSM.Cmd>()
             {
                 EnumerableFSM.Cmd.Run,
-                EnumerableFSM.Cmd.Idle,
+                EnumerableFSM.Cmd.Pause,
                 EnumerableFSM.Cmd.Resume,
                 EnumerableFSM.Cmd.End,
                 EnumerableFSM.Cmd.Run,
                 EnumerableFSM.Cmd.End,
                 EnumerableFSM.Cmd.Run,
-                EnumerableFSM.Cmd.Idle,
+                EnumerableFSM.Cmd.Pause,
                 EnumerableFSM.Cmd.End,
                 EnumerableFSM.Cmd.Run,
-                EnumerableFSM.Cmd.Idle,
+                EnumerableFSM.Cmd.Pause,
                 EnumerableFSM.Cmd.End,
                 EnumerableFSM.Cmd.Exit,
             };
-            
+
+            int idx = 0;
             foreach (var item in fsm.Work())
             {
-                richTextBox1.AppendText(item + "\n");
+                richTextBox1.AppendText(item + "-> " + (idx < fsm.cmd.Count ? fsm.cmd[idx++].ToString():"") + " \n");
             }
 
         }
