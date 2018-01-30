@@ -16,7 +16,14 @@ namespace WindowsFormsApp2_SimpleStateMachine
         public Form1()
         {
             InitializeComponent();
+            writeTextBox += OnWriteTextBox;
+            Fire += CmdEnd;
+        }
 
+        private Task CmdEnd()
+        {
+            fsm.Fire(Command.End);
+            return Task.CompletedTask;
         }
 
         private void FSM1()
@@ -57,47 +64,61 @@ namespace WindowsFormsApp2_SimpleStateMachine
             FSM1();
         }
         private static bool IsTrigger = false;
-        Func<bool> OnTrigger = () =>  IsTrigger;
-        Appccelerate.StateMachine.PassiveStateMachine<ProcessState, Command> fsm =
-            new Appccelerate.StateMachine.PassiveStateMachine<ProcessState, Command>();
+        Func<bool> OnTrigger = () => IsTrigger;
+        Appccelerate.StateMachine.PassiveStateMachine<ProcessState, Command> fsm;
+        int count = 0;
         private async void FSM2()
-        {           
+        {
+            fsm = new Appccelerate.StateMachine.PassiveStateMachine<ProcessState, Command>();
             fsm.In(ProcessState.Inactive)
-               .On(Command.Exit).Goto(ProcessState.Terminated).Execute(() => { richTextBox1.AppendText("Exit..\n"); })
-               .On(Command.Begin).Goto(ProcessState.Active);
+                    .ExecuteOnEntry(() => { writeTextBox(this, "Inactived..\n"); })
+               .On(Command.Exit).Goto(ProcessState.Terminated)
+                                .Execute(() => { writeTextBox(this, "Exit..\n"); })
+               .On(Command.Begin).Goto(ProcessState.Active)
+                                 .Execute(() => { writeTextBox(this, "-> Goto Active\n"); });
             fsm.In(ProcessState.Active)
-               .ExecuteOnEntry(() => { richTextBox1.AppendText("Ready to Run..\n"); })
-               .ExecuteOnExit(() => { richTextBox1.AppendText("Complete..\n"); })
-               .On(Command.End).Goto(ProcessState.Inactive).Execute(() => { richTextBox1.AppendText("-> Goto Inactive\n"); })
-               .On(Command.Pause).Goto(ProcessState.Paused).Execute(() => { richTextBox1.AppendText("-> Goto Pause\n"); });
+                    .ExecuteOnEntry(() => { writeTextBox(this, "Ready to Run..\n"); })
+                    .ExecuteOnExit(() => { writeTextBox(this, "Complete..\n"); })
+               .On(Command.End).Goto(ProcessState.Inactive)
+                               .Execute(() => { writeTextBox(this, "-> Goto Inactive\n"); })
+               .On(Command.Pause).Goto(ProcessState.Paused)
+                                 .Execute(() => { writeTextBox(this, "-> Goto Pause\n"); });
             fsm.In(ProcessState.Paused)
-               .ExecuteOnEntry(() => { richTextBox1.AppendText("Paused..\n");  })
-               .On(Command.End).If(OnTrigger).Goto(ProcessState.Inactive).Execute(() => { richTextBox1.AppendText("-> Goto Inactive\n"); })
-                               .Otherwise().Goto(ProcessState.Paused).Execute(() => { richTextBox1.AppendText("-> Goto Pause\n"); })
-               .On(Command.Resume).Goto(ProcessState.Active).Execute(() => { richTextBox1.AppendText("-> Goto Active\n"); });
+                    .ExecuteOnEntry(() => { writeTextBox(this, "Paused..\n"); })
+               .On(Command.End).Goto(ProcessState.Inactive)
+                               .Execute(() => { writeTextBox(this, "-> Goto Inactive\n"); IsTrigger = false; })
+               .On(Command.Resume).If(OnTrigger).Goto(ProcessState.Active)
+                                                .Execute(() => { writeTextBox(this, "-> Goto Active\n"); })
+                                  .Otherwise().Goto(ProcessState.Paused)
+                                              .Execute(() => { writeTextBox(this, "-> Retrive Pause\n"); })
+                                              .Execute(() => { if (count < 3){ fsm.Fire(Command.Resume); count++; } else count = 0; });
+
             fsm.Initialize(ProcessState.Inactive);
             fsm.Start();
-
-            fsm.Fire(Command.Begin);
-            fsm.Fire(Command.Pause);
-            await WaitTrigger();            
-            fsm.Fire(Command.End);
+            
             fsm.Fire(Command.Begin);
             fsm.Fire(Command.Pause);
             fsm.Fire(Command.Resume);
             fsm.Fire(Command.End);
-            fsm.Fire(Command.Exit);
 
+            fsm.Fire(Command.Begin);
+            fsm.Fire(Command.Pause);
+            fsm.Fire(Command.End);
+
+            fsm.Fire(Command.Begin);
+            fsm.Fire(Command.End);
+
+            fsm.Fire(Command.Exit);
+            
             fsm.Stop();
         }
+        event EventHandler<string> writeTextBox;
+        Func<Task> Fire;        
 
-        private async Task WaitTrigger()
+        private void OnWriteTextBox(object sender, string text)
         {
-            while (!IsTrigger)
-            {                
-                await Task.Delay(300);
-                fsm.Fire(Command.End);
-            }
+             richTextBox1.AppendText(text); 
+            
         }
 
         enum ProcessState
@@ -105,7 +126,7 @@ namespace WindowsFormsApp2_SimpleStateMachine
             Inactive,
             Active,
             Paused,
-            Terminated
+            Terminated,
         }
 
         enum Command
