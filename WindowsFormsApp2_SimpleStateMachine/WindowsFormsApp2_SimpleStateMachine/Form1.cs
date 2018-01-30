@@ -17,7 +17,6 @@ namespace WindowsFormsApp2_SimpleStateMachine
         {
             InitializeComponent();
             writeTextBox += OnWriteTextBox;
-            Fire += CmdEnd;
         }
 
         private Task CmdEnd()
@@ -66,9 +65,9 @@ namespace WindowsFormsApp2_SimpleStateMachine
         private static bool IsTrigger = false;
         Func<bool> OnTrigger = () => IsTrigger;
         Appccelerate.StateMachine.PassiveStateMachine<ProcessState, Command> fsm;
-        int count = 0;
-        private async void FSM2()
+        private void FSM2()
         {
+            int count = 0;
             fsm = new Appccelerate.StateMachine.PassiveStateMachine<ProcessState, Command>();
             fsm.In(ProcessState.Inactive)
                     .ExecuteOnEntry(() => { writeTextBox(this, "Inactived..\n"); })
@@ -88,10 +87,10 @@ namespace WindowsFormsApp2_SimpleStateMachine
                .On(Command.End).Goto(ProcessState.Inactive)
                                .Execute(() => { writeTextBox(this, "-> Goto Inactive\n"); IsTrigger = false; })
                .On(Command.Resume).If(OnTrigger).Goto(ProcessState.Active)
-                                                .Execute(() => { writeTextBox(this, "-> Goto Active\n"); })
+                                                .Execute(() => { writeTextBox(this, "-> Goto Active\n"); IsTrigger = false; count = 0;})
                                   .Otherwise().Goto(ProcessState.Paused)
                                               .Execute(() => { writeTextBox(this, "-> Retrive Pause\n"); })
-                                              .Execute(() => { if (count < 3){ fsm.Fire(Command.Resume); count++; } else count = 0; });
+                                              .Execute(() => { if (count < 2)  count++; else IsTrigger = true; fsm.Fire(Command.Resume);});
 
             fsm.Initialize(ProcessState.Inactive);
             fsm.Start();
@@ -109,16 +108,14 @@ namespace WindowsFormsApp2_SimpleStateMachine
             fsm.Fire(Command.End);
 
             fsm.Fire(Command.Exit);
-            
+
             fsm.Stop();
         }
         event EventHandler<string> writeTextBox;
-        Func<Task> Fire;        
 
         private void OnWriteTextBox(object sender, string text)
         {
-             richTextBox1.AppendText(text); 
-            
+             richTextBox1.AppendText(text);             
         }
 
         enum ProcessState
