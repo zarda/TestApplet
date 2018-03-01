@@ -29,7 +29,17 @@ namespace WindowsFormsMainNameSpace
         private void timerMain_Tick(object sender, EventArgs e)
         {
             this.TestClass.isRun = false;
-            //this.propertyGrid1.Refresh();
+            this.propertyGrid1.Refresh();
+        }
+
+        private void propertyGrid1_Enter(object sender, EventArgs e)
+        {
+            timerMain.Stop();
+        }
+
+        private void propertyGrid1_Leave(object sender, EventArgs e)
+        {
+            timerMain.Start();
         }
     }
 
