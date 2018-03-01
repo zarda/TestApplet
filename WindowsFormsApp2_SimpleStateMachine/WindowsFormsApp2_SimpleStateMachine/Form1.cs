@@ -139,12 +139,7 @@ namespace WindowsFormsApp2_SimpleStateMachine
         {
             richTextBox1.Clear();
             FSM2();
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            IsTrigger = true;
-        }
+        }        
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
