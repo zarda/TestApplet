@@ -14,8 +14,6 @@ namespace CfaToRGB
 {
     public partial class Form1 : Form
     {
-        private string FoldPath;
-
         public Form1()
         {
             InitializeComponent();
@@ -24,27 +22,33 @@ namespace CfaToRGB
         private void button1_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog path = new FolderBrowserDialog();
-            path.ShowDialog();
+            if (path.ShowDialog() == System.Windows.Forms.DialogResult.Cancel) return;
 
-            ProcessDirectory(path.SelectedPath);
+            Task.Run(async () => {
+                Application.UseWaitCursor = true;
+                await ProcessDirectory(path.SelectedPath);
+                Application.UseWaitCursor = false;
+            });            
+            
         }
 
         // Process all files in the directory passed in, recurse on any directories
         // that are found, and process the files they contain.
-        public static void ProcessDirectory(string targetDirectory)
+        public async Task ProcessDirectory(string targetDirectory)
         {
             // Process the list of files found in the directory.
             string[] fileEntries = Directory.GetFiles(targetDirectory);
             foreach (string fileName in fileEntries)
-                ProcessFile(fileName);
+                Task.Run( () => { ProcessFile(fileName); });
 
             // Recurse into subdirectories of this directory.
             string[] subdirectoryEntries = Directory.GetDirectories(targetDirectory);
             foreach (string subdirectory in subdirectoryEntries)
                 ProcessDirectory(subdirectory);
+            
         }
 
-        private static void ProcessFile(string fileName)
+        private void ProcessFile(string fileName)
         {            
             // Local iconic variables 
 
@@ -55,7 +59,7 @@ namespace CfaToRGB
             try
             {                
                 HOperatorSet.ReadImage(out ho_Cam00, fileName);
-                HOperatorSet.CfaToRgb(ho_Cam00, out ho_RGBImage, "bayer_rg", "bilinear");
+                HOperatorSet.CfaToRgb(ho_Cam00, out ho_RGBImage, "bayer_rg", "bilinear_enhanced");
                 HOperatorSet.WriteImage(ho_RGBImage, "bmp", 0, fileName);
             }
             catch(Exception e)
