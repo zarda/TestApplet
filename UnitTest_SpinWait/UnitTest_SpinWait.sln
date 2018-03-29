@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject1_SpinWait", "UnitTestProject1_SpinWait\UnitTestProject1_SpinWait.csproj", "{9AD3E670-518F-4041-9D74-91C4A7112C26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpinWaitUntil", "SpinWaitUntil\SpinWaitUntil.csproj", "{D68143E1-8BCE-4C39-8E5E-AC6C92F3E543}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9AD3E670-518F-4041-9D74-91C4A7112C26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AD3E670-518F-4041-9D74-91C4A7112C26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AD3E670-518F-4041-9D74-91C4A7112C26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AD3E670-518F-4041-9D74-91C4A7112C26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D68143E1-8BCE-4C39-8E5E-AC6C92F3E543}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D68143E1-8BCE-4C39-8E5E-AC6C92F3E543}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D68143E1-8BCE-4C39-8E5E-AC6C92F3E543}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D68143E1-8BCE-4C39-8E5E-AC6C92F3E543}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1D462DCF-CC89-478F-94BB-831F7C718AF8}
+	EndGlobalSection
+EndGlobal
